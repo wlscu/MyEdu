@@ -31,6 +31,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public String updateUser(User u) {
+        ResultVO r;
+        int rows = ud.updateUser(u);
+        if (rows == 0){
+            //修改失败有误
+            r = new ResultVO(0,"修改失败，请稍后重试！",null);
+        }else{
+            //修改成功
+            r = new ResultVO(1,"恭喜你，修改成功！",null);
+        }
+        return JsonUtil.toJson(r);
+    }
+
+    @Override
     public String delAllUser(String uids) {
         ResultVO r;
         int rows = ud.delAllUser(uids);

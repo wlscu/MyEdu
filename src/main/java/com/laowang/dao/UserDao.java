@@ -16,6 +16,8 @@ public interface UserDao {
      */
     int addUser(User u);
 
+    int updateUser(User u);
+
     int delAllUser(String uids);
 
     /**

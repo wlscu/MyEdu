@@ -29,6 +29,18 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
+    public int updateUser(User u) {
+        int rows = 0;
+        String sql = "update user set name=?,phone=?,age=?,sex=?,username=?,password=?,status=?,role=?  where uid=?";
+        try {
+            rows = qr.update(sql, u.getName(), u.getPhone(), u.getAge(), u.getSex(), u.getUsername(), u.getPassword(), u.getStatus(), u.getRole(),u.getUid());
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return rows;
+    }
+
+    @Override
     public int delAllUser(String uids) {
         int rows = 0;
         String sql = "delete from user where uid in ("+uids+")";

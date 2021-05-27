@@ -1,7 +1,5 @@
 package com.laowang.entity;
 
-import java.util.Date;
-
 /**
  * @author 隔壁老王
  */

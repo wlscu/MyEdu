@@ -18,6 +18,8 @@ public interface UserService {
      */
     String addUser(User u);
 
+    String updateUser(User u);
+
     String delAllUser(String uids);
 
     /**

@@ -14,7 +14,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -54,10 +56,27 @@ public class UserServlet extends BaseServlet {
         Integer role = Integer.valueOf(req.getParameter("role"));
         Integer age = Integer.valueOf(req.getParameter("age"));
         Integer sex = Integer.valueOf(req.getParameter("sex"));
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String createTime = sdf.format(new Date());
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd E a HH:mm:ss");
+        String createTime = df.format(new Date());
         User user = new User(null,name,phone,age,sex,username,password,status,createTime,role,null);
         String res = us.addUser(user);
+        PrintWriter out = resp.getWriter();
+        out.print(res);
+    }
+
+    protected void updateUser(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Integer uid = Integer.valueOf(req.getParameter("uid"));
+        String username = req.getParameter("username");
+        System.out.println(username);
+        String password = req.getParameter("password");
+        String name = req.getParameter("name");
+        String phone = req.getParameter("phone");
+        Integer status = Integer.valueOf(req.getParameter("status"));
+        Integer role = Integer.valueOf(req.getParameter("role"));
+        Integer age = Integer.valueOf(req.getParameter("age"));
+        Integer sex = Integer.valueOf(req.getParameter("sex"));
+        User user = new User(uid,name,phone,age,sex,username,password,status,null,role,null);
+        String res = us.updateUser(user);
         PrintWriter out = resp.getWriter();
         out.print(res);
     }

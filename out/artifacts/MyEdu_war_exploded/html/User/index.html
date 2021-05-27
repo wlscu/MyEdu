@@ -98,8 +98,8 @@
 				<el-form-item label="角色" prop="role">
 					<el-select v-model="ruleForm.role" placeholder="请选择活动区域">
 						<el-option label="管理员" :value="1"></el-option>
-						<el-option label="总经理" :value="2"></el-option>
-						<el-option label="用户" :value="3"></el-option>
+						<el-option label="一般用户" :value="2"></el-option>
+						<el-option label="VIP用户" :value="3"></el-option>
 					</el-select>
 				</el-form-item>
 			</el-form>
@@ -143,14 +143,14 @@
 				<el-form-item label="角色" prop="role">
 					<el-select v-model="ruleForm.role" placeholder="请选择活动区域">
 						<el-option label="管理员" :value="1"></el-option>
-						<el-option label="总经理" :value="2"></el-option>
-						<el-option label="用户" :value="3"></el-option>
+						<el-option label="一般用户" :value="2"></el-option>
+						<el-option label="VIP用户" :value="3"></el-option>
 					</el-select>
 				</el-form-item>
 
 				<el-form-item label="创建时间">
 					<el-col>
-						<el-date-picker type="date" placeholder="选择日期" v-model="ruleForm.createtime"
+						<el-date-picker type="date" placeholder="选择日期" v-model="ruleForm.createTime"
 							style="width:215px;">
 						</el-date-picker>
 					</el-col>
@@ -191,7 +191,7 @@
 				role: '',
 				age: '',
 				sex: '',
-				createtime: ''
+				createTime: ''
 			},
 			rules: {
 				username: [
@@ -256,7 +256,7 @@
 						}, trigger: 'blur'
 					}
 				],
-				createtime: [
+				createTime: [
 					{ type: 'date', required: true, message: '请选择日期', trigger: 'change' }
 				],
 			},
@@ -269,35 +269,12 @@
 		
 			handleEdit(index, row) {
 				this.dialogVisible=true;
-				var user = this.tableData[index];
-				this.ruleForm.uid = user.uid; 
-				this.ruleForm.username = user.username; 
-				this.ruleForm.name = user.name; 
-				this.ruleForm.phone = user.phone; 
-				this.ruleForm.status = user.status; 
-				this.ruleForm.role = user.role; 
-				this.ruleForm.age = user.age; 
-				this.ruleForm.sex = user.sex; 
-				this.ruleForm.createtime = user.createtime; 
-				this.ruleForm.password = user.password;
-				console.log(index);
+				this.ruleForm= row;
 			},
 		
 			handlelook(index, row) {
 				this.dialogVisible1=true; 
-				getUser(index,row);
-			},
-			getUser(index,row){
-				this.ruleForm.uid = row.uid; 
-				this.ruleForm.username = row.username; 
-				this.ruleForm.name = row.name; 
-				this.ruleForm.phone = row.phone; 
-				this.ruleForm.status = row.status; 
-				this.ruleForm.role = row.role; 
-				this.ruleForm.age = row.age; 
-				this.ruleForm.sex = row.sex; 
-				this.ruleForm.createtime = row.createtime; 
-				this.ruleForm.password = row.password;
+				this.ruleForm= row;
 			},
 
 			handleSelectionChange(val) {
@@ -363,7 +340,39 @@
 			},
 		
 			submitForm(formName) {
-			
+				this.$refs['ruleForm'].validate(res=>{
+					if(res){
+						//通过提交数据
+						var params = new URLSearchParams();
+						params.append("uid", this.ruleForm.uid);
+            			params.append("username", this.ruleForm.username);
+            			params.append("password", this.ruleForm.password);
+            			params.append("name", this.ruleForm.name);
+            			params.append("phone", this.ruleForm.phone);
+            			params.append("status", this.ruleForm.status);
+            			params.append("role", this.ruleForm.role);
+            			params.append("age", this.ruleForm.age);
+            			params.append("sex", this.ruleForm.sex);
+            			axios({
+              				method: 'post',
+              				url: 'http://localhost:8080/userServlet?flag=updateUser',
+              				data: params,
+             				 responseType: 'json'
+              			}).then(response => {
+               				 // 请求成功
+                			if (response.data.status == 1) {
+                			//成功
+                				this.$message.success(response.data.message);
+                				setTimeout("location.href = 'index.html'",1500);
+                			} else {
+               				 //失败
+                				this.$message.error(response.data.message);
+              				}
+           				 });
+					}else{
+						this.$message.warning("请认真填写信息！！！");
+					}
+				})
 			},
 		
 			resetForm(formName) {
