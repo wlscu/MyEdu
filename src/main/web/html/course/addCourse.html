@@ -31,13 +31,13 @@
 					</el-select>
 				</el-form-item>
 
-				<el-upload style="margin-left: 25px;" :on-remove="handleRemove" :on-exceed="handleExceed" :http-request="myUpload" class="upload-demo" ref="upload1" action="http://localhost/education/courses?method=uploadFile" :limit="1" :auto-upload="false">
+				<el-upload style="margin-left: 25px;" :on-remove="handleRemove" :on-exceed="handleExceed" :http-request="myUpload" class="upload-demo" ref="upload1" :limit="1" :auto-upload="false">
 					<el-button slot="trigger" size="small" type="primary">选取图片</el-button>
 					<el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload(1)">上传到服务器</el-button>
 				</el-upload>
 				<img :src="dialogImageUrl" style="width: 100px;height: 100px;margin-left: 25px;" alt="" />
 
-				<el-upload style="margin-left: 25px;" :on-remove="handleRemove" :on-exceed="handleExceed" :http-request="myUpload" class="upload-demo" ref="upload2" action="http://localhost/education/courses?method=uploadFile" :limit="1" :auto-upload="false">
+				<el-upload style="margin-left: 25px;" :on-remove="handleRemove" :on-exceed="handleExceed" :http-request="myUpload" class="upload-demo" ref="upload2" :limit="1" :auto-upload="false">
 					<el-button slot="trigger" size="small" type="primary">选取视频</el-button>
 					<el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload(2)">上传到服务器</el-button>
 				</el-upload>
@@ -57,7 +57,7 @@
 			</el-form>
 			<div slot="footer" class="dialog-footer" style="margin-left: 20px;">
 				<el-button @click="handleClose">取 消</el-button>
-				<el-button type="primary" @click="submitForm('ruleForm')">确 定</el-button>
+				<el-button type="primary" @click="submitForm()">确 定</el-button>
 			</div>
 			</div>
 			<!--结尾-->
@@ -117,27 +117,95 @@
 				
 				},
 			
-				handleExceed(files, fileList) {
-				
+				handleExceed(file, fileList) {
+					this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${file.length} 个文件，共选择了 ${file.length + fileList.length} 个文件`);
 				},
 			
 				submitUpload(value) {
-				
+					if(value == 1){
+						//图片,将upload1组件中的文件进行提交，会走:http-request所指定的函数
+						this.$refs['upload1'].submit();
+					}else{
+						//视频
+						this.$refs['upload2'].submit();
+					}
 				},
 			
 				handleRemove(file, fileList) {
-					
+					var fileName = "";
+					//将刚上传的文件删除掉
+					if(this.dialogImageUrl.indexOf(file.name) == -1){
+						//在之前返回的图片路径中没有找到当前要删除的文件的名字，代表删除的是视频
+						fileName = this.dialogVedioUrl;
+						this.dialogVedioUrl = '';
+					}else{
+						//删除图片
+						fileName = this.dialogImageUrl;
+						this.dialogImageUrl = '';
+					}
+					axios({
+						url:'http://localhost:8080/courseServlet?flag=removeFile&fileName='+fileName,
+						method:'post'
+					}).then(obj=>{
+						if(obj.data.status == 1){
+							this.dialogImageUrl = '';
+						}else{
+							this.dialogVedioUrl = '';
+						}
+						this.$message.success(obj.data.message);
+					});
 				},
 			
 				myUpload(content) {
-
+					//处理文件对象FormData
+					var params = new FormData();
+					params.append("file",content.file);
+					axios({
+						url:'http://localhost:8080/courseServlet?flag=uploadFile',
+						method:'post',
+						data:params
+					}).then(response=>{
+						var ResultVO = eval("("+response.data+")");
+						if(ResultVO.status == 1){
+							this.dialogImageUrl = ResultVO.data;
+						}else{
+							this.dialogVedioUrl = ResultVO.data;
+						}
+						this.$message.success( ResultVO.message);
+					});
 				},
-				submitForm(formName) {
-					
+				
+				submitForm() {
+					this.$refs['ruleForm'].validate(obj=>{
+						if(obj){
+							var params = new FormData();
+							params.append("courseName",this.ruleForm.courseName);
+							params.append("descs",this.ruleForm.descs);
+							params.append("courseType",this.ruleForm.courseType);
+							params.append("coursePrice",this.ruleForm.coursePrice);
+							params.append("courseImage",this.dialogImageUrl);
+							params.append("courseVideo",this.dialogVedioUrl);
+							axios({
+								url:'http://localhost:8080/courseServlet?flag=addCourse',
+								data:params,
+								method:'post'
+							}).then(obj=>{
+								if(obj.data.status == 1){
+									//成功
+									this.$message.success(obj.data.message);
+									window.setTimeout("window.location.href='index.html'",1500);
+								}else{
+									//失败
+									this.$message.error(obj.data.message);
+								}
+							});
+						}else{
+							this.$message.warning("请认真填写数据！！！");
+						}
+					});
 				}
 
 			}
 		})
 	</script>
-
 </html>

@@ -43,20 +43,19 @@
 					<el-table-column label="操作">
 						<template slot-scope="scope">
 							<el-button size="mini" @click="handleEdit(scope.$index, scope.row)">修改</el-button>
-							<el-button size="mini" type="danger" @click="handleLook(scope.$index, scope.row)">详情
-							</el-button>
+							<el-button size="mini" type="danger" @click="handleLook(scope.$index, scope.row)">明细</el-button>
 						</template>
 					</el-table-column>
 					<el-table-column align="left" width="200px">
 						<template slot="header" slot-scope="scope">
-							<el-input v-model="search" @blur="findAll()" size="mini" placeholder="输入课程名称搜索" />
+							<el-input v-model="search" @blur="findByName" size="mini" placeholder="输入课程名称搜索" />
 						</template>
 					</el-table-column>
 				</el-table>
 			</template>
 			<br />
 			<el-row>
-				<el-button type="warning" @click="delAll()">删除选中</el-button>
+				<el-button type="warning" @click="deleteCourse()">删除选中</el-button>
 				<el-button type="primary">
 					<a href="addCourse.html" target="main" style="text-decoration: none;color: white;">上传课程</a>
 				</el-button>
@@ -73,7 +72,7 @@
 		</div>
 
 		<!--修改课程-->
-		<el-dialog title="收货地址" :visible.sync="dialogFormVisible1" :close-on-click-modal="false">
+		<el-dialog title="" :visible.sync="dialogFormVisible1" :close-on-click-modal="false">
 			<!--表单-->
 			<el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
 				<el-form-item label="课程名称" prop="courseName">
@@ -92,7 +91,7 @@
 				<!--上传-->
 				<el-upload style="margin-left: 25px;" :on-remove="handleRemove" :on-exceed="handleExceed"
 					:http-request="myUpload" class="upload-demo" ref="upload1"
-					action="http://localhost/education/courses?method=uploadFile" :limit="1" :auto-upload="false">
+					:limit="1" :auto-upload="false">
 					<el-button slot="trigger" size="small" type="primary">选取图片</el-button>
 					<el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload(1)">上传到服务器
 					</el-button>
@@ -101,7 +100,7 @@
 
 				<el-upload style="margin-left: 25px;" :on-remove="handleRemove" :on-exceed="handleExceed"
 					:http-request="myUpload" class="upload-demo" ref="upload2"
-					action="http://localhost/education/courses?method=uploadFile" :limit="1" :auto-upload="false">
+					:limit="1" :auto-upload="false">
 					<el-button slot="trigger" size="small" type="primary">选取视频</el-button>
 					<el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload(2)">上传到服务器
 					</el-button>
@@ -122,44 +121,50 @@
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="dialogFormVisible1 = false">取 消</el-button>
-				<el-button type="primary" @click="submitForm('ruleForm')">确 定</el-button>
+				<el-button type="primary" @click="submitForm()">确 定</el-button>
 			</div>
 		</el-dialog>
 		<!--结尾-->
 
-		<!--查看课程-->
-		<el-dialog title="查看课程" :visible.sync="dialogFormVisible2">
-			<el-form ref="ruleForm" :model="ruleForm" label-width="80px">
-				<el-form-item label="课程名称">
-					<el-input v-model="ruleForm.courseName" style="width: 210px;"></el-input>
-				</el-form-item>
-				<el-form-item label="课程简介">
-					<el-input v-model="ruleForm.descs" style="width: 210px;"></el-input>
-				</el-form-item>
-				<el-form-item label="课程类型">
-					<el-select v-model="ruleForm.courseType" placeholder="请选择课程类型">
-						<el-option label="JavaEE" :value="1"></el-option>
-						<el-option label="数据库" :value="2"></el-option>
-						<el-option label="前端技术" :value="3"></el-option>
-					</el-select>
-				</el-form-item>
+		<!--课程明细对话框-->
+			<el-dialog title="课程明细" :visible.sync="dialogFormVisible2">
+				<el-form ref="ruleForm" :model="ruleForm" label-width="80px">
+					<el-form-item label="课程名称">
+						<el-input v-model="ruleForm.name" style="width: 210px;"></el-input>
+					</el-form-item>
+					<el-form-item label="所属课程">
+						<el-input v-model="ruleForm.courseName" style="width: 210px;"></el-input>
+					</el-form-item>
+					<el-form-item label=所属章节>
+						<el-select v-model="ruleForm.type" placeholder="请选择所属章节">
+							<el-option label="章节一" :value="1"></el-option>
+							<el-option label="章节二" :value="2"></el-option>
+							<el-option label="章节三" :value="3"></el-option>
+						</el-select>
+					</el-form-item>
 
-				<img :src="dialogImageUrl" style="width: 100px;height: 100px;margin-left: 25px;" alt="" />
+					<el-form-item label="开课时间">
+						<el-col :span="7">
+						  <el-date-picker type="date"  value-format="yyyy-MM-dd"   placeholder="开课日期" v-model="ruleForm.start_data" style="width: 100%;"></el-date-picker>
+						</el-col>
+					</el-form-item>
 
-				<video controls autoplay muted="muted"
-					style="width: 100px;height: 100px;margin-left: 25px;margin-top: 5px;" :src="dialogVedioUrl"></video>
-				<el-form-item label="课程价格">
-					<el-input v-model="ruleForm.coursePrice" style="width: 210px;"></el-input>
-				</el-form-item>
-				<el-form-item label="状态">
-					<el-radio-group v-model="ruleForm.status">
-						<el-radio :label="0">未上架</el-radio>
-						<el-radio :label="1">上架</el-radio>
-						<el-radio :label="2">下架</el-radio>
-					</el-radio-group>
-				</el-form-item>
-			</el-form>
-		</el-dialog>
+					<el-upload style="margin-left: 25px;" :on-remove="handleRemove" :on-exceed="handleExceed"
+						:http-request="myUpload" class="upload-demo" ref="upload3"
+						:limit="1" :auto-upload="false">
+						<el-button slot="trigger" size="small" type="primary">选取视频</el-button>
+						<el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload(3)">上传到服务器
+						</el-button>
+					</el-upload>
+
+					<video controls autoplay muted="muted"
+						style="width: 100px;height: 100px;margin-left: 25px;margin-top: 5px;" :src="ruleForm.url"></video>
+				</el-form>
+				<div slot="footer" class="dialog-footer">
+					<el-button @click="dialogFormVisible2 = false">取 消</el-button>
+					<el-button type="primary" @click="detailForm('ruleForm')">确 定</el-button>
+				</div>
+			</el-dialog>
 		<!--结尾-->
 	</div>
 </body>
@@ -199,7 +204,11 @@
 				courseType: '',
 				coursePrice: '',
 				courseImage: '',
-				courseVideo: ''
+				courseVideo: '',
+				name:'',
+				type:'',
+				url:'',
+				start_data:''
 			},
 			/*校验规则*/
 			rules: {
@@ -241,7 +250,10 @@
 			},
 		
 			handleEdit(index, row) {
-				
+				this.dialogFormVisible1 = true;
+				this.ruleForm = row;
+				this.dialogImageUrl = "http://localhost:8080/MyEdu/"+row.courseImage;
+				this.dialogVedioUrl = "http://localhost:8080/MyEdu/"+row.courseVideo;
 			},
 		
 			handleExceed(files, fileList) {
@@ -249,42 +261,141 @@
 			},
 			
 			submitUpload(value) {
-				
+				console.log("进来了");
+				if(value == 1){
+					//图片,将upload1组件中的文件进行提交，会走:http-request所指定的函数
+					this.$refs['upload1'].submit();
+				}else if(value == 2){
+					//视频
+					this.$refs['upload2'].submit();
+				}else{
+					//课程明细中上传的视频
+					this.$refs['upload3'].submit();
+				}
 			},
 		
 			handleRemove(file, fileList) {
-
+					var fileName = "";
+					//将刚上传的文件删除掉
+					if(this.dialogImageUrl.indexOf(file.name) == -1){
+						//在之前返回的图片路径中没有找到当前要删除的文件的名字，代表删除的是视频
+						fileName = this.dialogVedioUrl;
+						this.dialogVedioUrl = '';
+					}else{
+						//删除图片
+						fileName = this.dialogImageUrl;
+						this.dialogImageUrl = '';
+					}
+					axios({
+						url:'http://localhost:8080courseServlet?flag=removeFile&fileName='+fileName,
+						method:'post'
+					}).then(obj=>{
+						if(obj.data.status == 1){
+							this.dialogImageUrl = '';
+						}else{
+							this.dialogVedioUrl = '';
+						}
+						this.$message.success(obj.data.message);
+					});
 			},
 		
 			myUpload(content) {
-
+					//处理文件对象FormData
+					var params = new FormData();
+					params.append("file",content.file);
+					axios({
+						url:'http://localhost:8080/courseServlet?flag=uploadFile',
+						method:'post',
+						data:params
+					}).then(obj=>{
+						if(obj.data.status == 1){
+							this.dialogImageUrl = obj.data.data;
+						}else{
+							this.ruleForm.url = obj.data.data
+						}
+						this.$message.success(obj.data.message);
+					});
 			},
 			
-			submitForm(formName) {
-				
+			submitForm() {
+				this.$refs['ruleForm'].validate(obj=>{
+						if(obj){
+							var params = new FormData();
+							params.append("cid",this.ruleForm.cid);
+							params.append("courseName",this.ruleForm.courseName);
+							params.append("descs",this.ruleForm.descs);
+							params.append("courseType",this.ruleForm.courseType);
+							params.append("coursePrice",this.ruleForm.coursePrice);
+							params.append("courseImage",this.dialogImageUrl);
+							params.append("courseVideo",this.dialogVedioUrl);
+							axios({
+								url:'http://localhost:8080/courseServlet?flag=updateCourse',
+								data:params,
+								method:'post'
+							}).then(obj=>{
+								if(obj.data.status == 1){
+									//成功
+									this.$message.success(obj.data.message);
+									window.setTimeout("window.location.href='index.html'",1500);
+								}else{
+									//失败
+									this.$message.error(obj.data.message);
+								}
+							});
+						}else{
+							this.$message.warning("请认真填写数据");
+						}
+					});
 			},
 	
 			handleLook(index, row) {
-			
+				this.dialogFormVisible2 = true;
+				this.ruleForm = row;
 			},
 		
 			handleSelectionChange(val) {
-			
+				this.multipleSelection = val;
 			},
 		
-			delAll() {
-			
+			deleteCourse() {
+				this.delarr = [];
+				//获取所有被选中的课程的cid
+				for(var i=0;i<this.multipleSelection.length;i++){
+					this.delarr.push(this.multipleSelection[i].cid);
+				}
+				if(this.delarr.length == 0){
+					this.$message.warning("请选择您要删除的数据");
+				}else{
+					this.$confirm("您确定要删除这些数据吗","提示",{type:'warning'}).then(()=>{
+						//join()将数组数据转换成用逗号隔开的字符串
+						axios({
+							url:'http://localhost:8080/courseServlet?flag=deleteCourse&cids='+this.delarr.join(),
+							method:'post'
+						}).then(obj=>{
+							if(obj.data.status == 1){
+								//成功
+								this.$message.success(obj.data.message);
+								window.setTimeout("window.location.href='index.html'",1500);
+							}else{
+								//失败
+								this.$message.error(obj.data.message);
+							}
+						});
+					}).catch(()=>{
+
+					});
+				}
 			},
 		
 			handleSizeChange: function (size) {
-			
+				this.tableData = '';
+				this.pageSize = size;
+				this.findByPage();
 			},
 			handleCurrentChange: function (currentPage) {
-			
-			},
-		
-			handleRemove(file, fileList) {
-			
+				this.tableData = '';
+				this.currentPage = currentPage;
+				this.findByPage();
 			},
 			
 			handlePreview(file) {
@@ -294,11 +405,30 @@
 			handleExceed(files, fileList) {
 				this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
 			},
-		
-			findAll() {
-			
-			}
 
+			findByPage() {
+				axios({
+					url:'http://localhost:8080/courseServlet?flag=getCourseByPage&page='+this.currentPage+'&rows='+this.pageSize+'&courseName='+this.search,
+					method:'post'
+				}).then(obj=>{
+					console.log(obj);
+					this.tableData = obj.data.list;
+					this.totalCount = obj.data.countRows;
+				});
+			},
+			findByName() {
+				axios({
+					url:'http://localhost:8080/courseServlet?flag=getCourseByPage&page=1&rows='+this.pageSize+'&courseName='+this.search,
+					method:'post'
+				}).then(obj=>{
+					console.log(obj);
+					this.tableData = obj.data.list;
+					this.totalCount = obj.data.countRows;
+				});
+			}
+		},
+		created(){
+			this.findByPage();
 		}
 	
 	})

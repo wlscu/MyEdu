@@ -4,14 +4,14 @@ package com.laowang.util;
  * @author 隔壁老王
  */
 public class PageUtil{
-    private int page;
-    private int rows;
-    private int index;
-    private int countRows;
-    private int countPages;
-    private int prevPage;
-    private int nextPage;
-    private Object list;
+    private int page; //当前页
+    private int rows; //行数
+    private int index; //索引，分页函数的初始值
+    private int countRows; //总行数
+    private int countPages; //总页数
+    private int prevPage; //上一页
+    private int nextPage; //下一页
+    private Object list; //PU携带的数据
 
    public PageUtil(String page,Integer rows, Integer countRows){
        this.rows =rows;

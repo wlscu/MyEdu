@@ -14,9 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -56,7 +54,7 @@ public class UserServlet extends BaseServlet {
         Integer role = Integer.valueOf(req.getParameter("role"));
         Integer age = Integer.valueOf(req.getParameter("age"));
         Integer sex = Integer.valueOf(req.getParameter("sex"));
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd E a HH:mm:ss");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String createTime = df.format(new Date());
         User user = new User(null,name,phone,age,sex,username,password,status,createTime,role,null);
         String res = us.addUser(user);

@@ -1,41 +1,63 @@
 package com.laowang.service.impl;
 
+import com.laowang.dao.CourseDao;
 import com.laowang.dao.impl.CourseDaoImpl;
 import com.laowang.entity.Course;
+import com.laowang.entity.ResultVO;
 import com.laowang.service.CourseService;
+import com.laowang.util.JsonUtil;
+import com.laowang.util.PageUtil;
+
+import java.util.List;
 
 /**
  * @author 隔壁老王
  */
 public class CourseServiceImpl implements CourseService {
-    CourseDaoImpl cd = new CourseDaoImpl();
+    CourseDao cd = new CourseDaoImpl();
     @Override
-    public boolean addCourse(Course c) {
-        boolean res = true;
+    public String addCourse(Course c) {
         int rows = cd.addCourse(c);
-        if (rows == 0){
-            res = false;
+        ResultVO r = null;
+        if(rows != 0){
+            r = new ResultVO(1,"新增成功",null);
+        }else{
+            r = new ResultVO(2,"新增失败",null);
         }
-        return res;
+        return JsonUtil.toJson(r);
     }
 
     @Override
-    public boolean updateCourse(Course c) {
-        boolean res = true;
+    public String updateCourse(Course c) {
         int rows = cd.updateCourse(c);
-        if (rows == 0){
-            res = false;
+        ResultVO v = null;
+        if(rows != 0){
+            v = new ResultVO(1,"恭喜你，修改成功！",null);
+        }else{
+            v = new ResultVO(2,"修改失败，请稍后再试！",null);
         }
-        return res;
+        return JsonUtil.toJson(v);
     }
 
     @Override
-    public boolean deleteCourse(String cids) {
-        boolean res = true;
+    public String deleteCourse(String cids) {
         int rows = cd.deleteCourse(cids);
-        if (rows == 0){
-            res = false;
+        ResultVO r = null;
+        if(rows == 0){
+            r = new ResultVO(2,"删除失败，请稍后再试！",null);
+        }else{
+            r = new ResultVO(1,"恭喜你，删除成功！",null);
         }
-        return res;
+        return JsonUtil.toJson(r);
+    }
+
+    @Override
+    public int getCountRows(String courseName) {
+        return cd.getCountRows(courseName);
+    }
+
+    @Override
+    public List<Course> getCountByName(PageUtil pu,String courseName) {
+        return cd.getCountByName(pu, courseName);
     }
 }

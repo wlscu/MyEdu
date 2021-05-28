@@ -1,6 +1,9 @@
 package com.laowang.dao;
 
 import com.laowang.entity.Course;
+import com.laowang.util.PageUtil;
+
+import java.util.List;
 
 /**
  * @author 隔壁老王
@@ -27,5 +30,21 @@ public interface CourseDao {
      * @return 返回删除条数，0为删除失败
      */
     int deleteCourse(String cids);
+
+    /**
+     * 根据课程名称获取数据库课程总记录数
+     * @param courseName 课程名称
+     * @return 返回总记录数
+     */
+    int getCountRows(String courseName);
+
+    /**
+     * 根据课程名称获取数据库课程的分页详情List
+     * @param pu 分页工具，携带起始index,单页rows，当前page
+     * @param courseName 课程名称
+     * @return 返回分页的课程List
+     */
+    List<Course> getCountByName(PageUtil pu ,String courseName);
+
 }
 

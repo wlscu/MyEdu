@@ -7,17 +7,17 @@ public class Course {
     private Integer cid;
     private String courseName;
     private String descs;
-    private String courseType;
+    private Integer courseType;
     private String courseImage;
     private String courseVideo;
     private Double coursePrice;
-    private Integer status;
+    private Integer status; // 课程状态 0：未上架 1：上架 2：下架
     private String createTime;
 
     public Course() {
     }
 
-    public Course(Integer cid, String courseName, String descs, String courseType, String courseImage, String courseVideo, Double coursePrice, Integer status, String createTime) {
+    public Course(Integer cid, String courseName, String descs, Integer courseType, String courseImage, String courseVideo, Double coursePrice, Integer status, String createTime) {
         this.cid = cid;
         this.courseName = courseName;
         this.descs = descs;
@@ -53,11 +53,11 @@ public class Course {
         this.descs = descs;
     }
 
-    public String getCourseType() {
+    public Integer getCourseType() {
         return courseType;
     }
 
-    public void setCourseType(String courseType) {
+    public void setCourseType(Integer courseType) {
         this.courseType = courseType;
     }
 

@@ -1,6 +1,7 @@
 package com.laowang.controller;
 
 import javax.servlet.*;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
